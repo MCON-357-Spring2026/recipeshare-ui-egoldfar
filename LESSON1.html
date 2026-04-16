@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lesson 1 - Next.js App Router Recipes</title>
+    <style>
+        :root {
+            --bg: #f4f8ff;
+            --hero1: #0f172a;
+            --hero2: #1d4ed8;
+            --panel: #ffffff;
+            --ink: #1f2937;
+            --muted: #475569;
+            --line: #dbe4f0;
+            --accent: #2563eb;
+            --accent-soft: #dbeafe;
+            --ok-soft: #ecfdf5;
+            --ok-line: #34d399;
+            --warn-soft: #fff7ed;
+            --warn-line: #fb923c;
+            --shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+            --code: #0b1120;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--ink);
+            background: linear-gradient(180deg, #e8f0ff 0%, #f8fbff 50%, #eef4ff 100%);
+            line-height: 1.55;
+        }
+        .hero {
+            background: linear-gradient(135deg, var(--hero1), var(--hero2));
+            color: white;
+            padding: 46px 24px;
+        }
+        .hero-inner, .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+        h1 { margin: 0 0 10px; font-size: 2.5rem; }
+        .hero p { margin: 0; color: #dbeafe; max-width: 880px; font-size: 1.08rem; }
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .pill {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.92rem;
+        }
+        .wrap { padding: 28px 24px 54px; }
+        .section {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        h2 { margin-top: 0; font-size: 1.7rem; }
+        h3 { margin-bottom: 8px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .one_column_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+            gap: 16px;
+            row-gap: 24px;
+        }
+        .card {
+            background: #fcfdff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .note {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border-left: 5px solid var(--accent);
+            background: var(--accent-soft);
+        }
+        .note.ok {
+            background: var(--ok-soft);
+            border-left-color: var(--ok-line);
+        }
+        .note.warn {
+            background: var(--warn-soft);
+            border-left-color: var(--warn-line);
+        }
+        pre {
+            margin: 10px 0 0;
+            background: var(--code);
+            color: #e5eefc;
+            padding: 16px;
+            border-radius: 12px;
+            overflow: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            background: #eef2ff;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 14px;
+            font-weight: 700;
+        }
+        .flow span {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+        .arrow { color: var(--muted); font-weight: 400; }
+        .timeline { display: grid; gap: 12px; }
+        .step {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            background: white;
+        }
+        .step strong { color: var(--accent); }
+        ul, ol { padding-left: 22px; }
+        .mini {
+            display: inline-block;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<header class="hero">
+    <div class="hero-inner">
+        <h1>Lesson 1: Next.js App Router + Recipes</h1>
+        <p>
+            In this lesson, we create a new Next.js app, learn the minimum React and App Router ideas we'll need,
+            connect to the Flask backend, and display a list of recipes on the page.
+        </p>
+        <div class="pill-row">
+            <div class="pill">Next.js App Router</div>
+            <div class="pill">Client components</div>
+            <div class="pill">useState + useEffect</div>
+            <div class="pill">Fetch from Flask backend</div>
+            <div class="pill">Render a list</div>
+        </div>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="section">
+        <h2>Lesson goal</h2>
+        <div class="flow">
+            <span>Create a Next app</span>
+            <span class="arrow">→</span>
+            <span>Hello from Next.js</span>
+            <span class="arrow">→</span>
+            <span>Create RecipeList</span>
+            <span class="arrow">→</span>
+            <span>JSX + useState in RecipeList</span>
+            <span class="arrow">→</span>
+            <span>Fetch from Flask</span>
+            <span class="arrow">→</span>
+            <span>Lift state to page.js</span>
+        </div>
+        <div class="note ok">
+            <strong>Target outcome:</strong> by the end of class, the home page should load recipe data from the Flask API and display it in a simple list.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>What we need running</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Backend</h3>
+                <p>Flask API running locally, ideally at <code>http://localhost:5000</code>.</p>
+            </div>
+            <div class="card">
+                <h3>Node.js</h3>
+                <p>Use a current Node version that works with the latest Next.js.</p>
+            </div>
+            <div class="card">
+                <h3>Recipes endpoint</h3>
+                <p>An endpoint <code>GET /api/recipes</code> that returns JSON.</p>
+            </div>
+        </div>
+        <div class="note">
+            <strong>Node.js</strong> Node.js is installed on your AzureVM.
+            On your machine you will need to install it.
+            <details style="margin: 16px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa;">
+                <summary style="font-weight: bold; font-size: 1.1em; cursor: pointer;">
+                    Install Node.js (Required for Next.js)
+                </summary>
+
+                <div style="margin-top: 12px; line-height: 1.6;">
+
+                    <h4>1. Download Node.js</h4>
+                    <p>
+                        Go to the official Node.js website:
+                        <br />
+                        <a href="https://nodejs.org" target="_blank">https://nodejs.org</a>
+                        <br />
+                        Download the <strong>LTS (Long Term Support)</strong> version.
+                    </p>
+
+                    <h4>2. Install on Your System</h4>
+                    <ul>
+                        <li><strong>Windows:</strong> Run the <code>.msi</code> installer → keep default settings → finish installation</li>
+                        <li><strong>Mac:</strong> Open the <code>.pkg</code> file → click through the installer steps</li>
+                    </ul>
+
+                    <h4>3. Verify Installation</h4>
+                    <p>Open Terminal (Mac) or Command Prompt (Windows) and run:</p>
+                    <pre style="background:#000; color:#FFF; padding:10px; border-radius:6px; overflow:auto;">
+node -v
+npm -v
+                    </pre>
+                    <p>
+                        You should see version numbers (example: <code>v20.x.x</code>).<br />
+                        If not, restart your terminal and try again.
+                    </p>
+                </div>
+            </details>
+
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Create the Next.js app</h2>
+        <p> Create a brand-new app with the official CLI:</p>
+        <pre>npx create-next-app@latest recipes-frontend</pre>
+        <p>Suggested choices during setup:</p>
+        <ul>
+            <li>Choose <strong>No, customize settings</strong></li>
+            <li>Would you like to use Typescript? Choose <strong>No</strong></li>
+            <li>ESLint: <strong>Yes</strong> is fine</li>
+            <li>Tailwind CSS: <strong>No</strong></li>
+            <li>Use <code>src/</code> directory: your choice, but this lesson assumes <strong>No</strong></li>
+            <li>Use <strong>App Router</strong>: <strong>Yes</strong></li>
+            <li>Import alias: default is fine</li>
+            <li>Don't include AGENTS.md</li>
+        </ul>
+        <pre>cd recipes-frontend
+npm run dev</pre>
+        <div class="note">
+            The app should open at <code>http://localhost:3000</code>.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Starter file structure</h2>
+        <pre>recipes-frontend/
+├── app/
+│   ├── layout.js
+│   ├── page.js
+│   └── globals.css
+├── components/    ---> you will create this folder
+│   └── RecipeList.jsx  ---> you will create this file
+├── public/
+├── package.json
+├── package-lock.json
+└── lesson1.html</pre>
+    </section>
+
+    <section class="section">
+        <h2>How does App Router work</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="mini">Folder rule</div>
+                <p><code>app/page.js</code> is the home page.</p>
+            </div>
+            <div class="card">
+                <div class="mini">Layout rule</div>
+                <p><code>app/layout.js</code> wraps every page.</p>
+            </div>
+            <div class="card">
+                <div class="mini">Important rule</div>
+                <p>If you want <code>useState</code> or <code>useEffect</code>, the component must say <code>"use client"</code>.</p>
+            </div>
+        </div>
+        <div class="note warn">
+            <strong>Server vs Client</strong> in the App Router, files are <strong>server components</strong> by default, which render on the server and are great for loading data securely. <strong>Client components</strong> run in the browser and are required when you use interactivity like <code>useState</code>, <code>useEffect</code>, or click handlers.
+        </div>
+    </section>
+    <section class="section">
+        <h2>Step 1: Replace the default page with Hello from Next.js</h2>
+        <p>Open <code>app/page.js</code> and replace its contents with:</p>
+        <pre>export default function HomePage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Hello from Next.js&lt;/h1&gt;
+      &lt;p&gt;This is my recipes frontend.&lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</pre>
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>Page idea</h3>
+                <p>In App Router, <code>/app/page.js</code> is the home route.</p>
+            </div>
+            <div class="card">
+                <h3>Component idea</h3>
+                <p>A React component is a JavaScript function that returns UI.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Very short JavaScript refresher</h2>
+        <div class="one_column_grid">
+            <div class="card">
+                <h3>Objects &amp; JSON</h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    The way you define an object in JavaScript <em>is</em> JSON.
+                    <strong>JSON stands for JavaScript Object Notation</strong> — it was literally invented
+                    to describe JS objects. When your Flask API returns JSON, JavaScript can read it
+                    directly as a plain object.
+                </p>
+                <pre>const recipe = {
+  id: 1,
+  title: "Soup"
+};
+
+// This is also valid JSON — same syntax!</pre>
+            </div>
+            <div class="card">
+                <h3>Named Functions</h3>
+                <pre>function greet(name) {
+  return `Hello ${name}`;
+}</pre>
+            </div>
+            <div class="card">
+                <h3>Arrow Functions (Lambdas)</h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    Arrow functions are JavaScript's version of Java lambdas — a compact way to write
+                    a function without the <code>function</code> keyword.
+                    Arrow functions follow almost the same syntax as Java lambdas, but with a fat arrow <code> => </code> instead of <code> -> </code>.
+                    They are used everywhere in React: event handlers, <code>.map()</code> / <code>.filter()</code> callbacks, and
+                    <code>useEffect</code> bodies.
+                </p>
+                <pre>// Traditional function
+function add(a, b) {
+  return a + b;
+}
+
+// Arrow function — more concise
+const add = (a, b) =&gt; a + b;
+
+// Single parameter — parentheses optional
+const double = n =&gt; n * 2;
+
+// Multi-line body needs curly braces + return
+const greet = (name) =&gt; {
+  const msg = `Hello, ${name}!`;
+  return msg;
+};
+
+// Returning an object literal — wrap in ( )
+const toObj = (title) =&gt; ({ title });
+
+// Common in React callbacks
+recipes.map(r =&gt; &lt;RecipeCard key={r.id} recipe={r} /&gt;);</pre>
+            </div>
+        </div>
+
+            <div class="card">
+                <h3>Collections: map, filter, reduce</h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    You just learned Java Streams — <code>map</code>, <code>filter</code>, and <code>reduce</code>
+                    are the exact same idea in JavaScript. There is no separate "stream" step; you call
+                    these methods directly on any collection. Same mental model, slightly simpler syntax.
+                </p>
+                <pre>const recipes = [
+  { id: 1, title: "Soup",  calories: 200 },
+  { id: 2, title: "Cake",  calories: 500 },
+  { id: 3, title: "Salad", calories: 150 },
+];  // array of objects
+
+// map  → transform every element (like Stream.map)
+const titles = recipes.map(r =&gt; r.title);
+// ["Soup", "Cake", "Salad"] -> array of strings
+
+// filter → keep only matching elements (like Stream.filter)
+const light = recipes.filter(r =&gt; r.calories &lt; 300);
+// [{Soup}, {Salad}] -> array of objects, but only the light ones
+
+// reduce → collapse to a single value (like Stream.reduce)
+const total = recipes.reduce(
+  (sum, r) =&gt; sum + r.calories, 0
+);
+// 850 -> a single number - total calories
+
+// chain them, just like Java streams
+const lightTitles = recipes
+  .filter(r =&gt; r.calories &lt; 300)
+  .map(r =&gt; r.title);
+// ["Soup", "Salad"]</pre>
+            </div>
+
+        <div class="note ok">
+            <strong>Main message:</strong> React rendering a list is just <code>.map()</code> over an array of data —
+            the same stream-style thinking you already know from Java, applied directly to arrays.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>What is JSX?</h2>
+        <p>
+            JSX is the syntax React uses to describe what the UI should look like.
+            It <em>looks</em> like HTML, but it lives inside a JavaScript file and is actually JavaScript.
+            The key difference is that JSX lets you drop JavaScript expressions directly into your markup
+            using curly braces <code>{ }</code>.
+        </p>
+        <div class="grid">
+            <div class="card">
+                <h3>JSX vs HTML</h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    HTML is a static document format. JSX is compiled by React into JavaScript function
+                    calls, so you get the familiar look of HTML with the full power of JS behind it.
+                    A few things are slightly different: <code>class</code> becomes <code>className</code>,
+                    and every tag must be closed (e.g. <code>&lt;br /&gt;</code>).
+                </p>
+            </div>
+            <div class="card">
+                <h3>Embedding JavaScript with <code>{ }</code></h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    Anything inside curly braces is evaluated as a JavaScript expression —
+                    a variable, a calculation, a function call, even a <code>.map()</code>.
+                </p>
+                <pre>const title = "Chicken Soup";
+const servings = 4;
+
+export default function RecipeCard() {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;p&gt;Serves: {servings}&lt;/p&gt;
+      &lt;p&gt;Double batch: {servings * 2} servings&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+            </div>
+        </div>
+        <div class="note ok">
+            <strong>Rule of thumb:</strong> plain text → just type it; dynamic value → wrap it in <code>{ }</code>.
+            Think of <code>{ }</code> as an escape hatch from HTML-land back into JavaScript-land.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>React Hooks</h2>
+        <p>
+            <strong>Hooks</strong> are special functions built into React that let your component <em>do things</em> —
+            remember values, run code at the right time, share data, and more.
+            They always start with the word <code>use</code> (e.g. <code>useState</code>, <code>useEffect</code>).
+            You can only call hooks at the top level of a component, never inside loops or conditions.
+            In this lesson we use two: <code>useState</code> to store data, and <code>useEffect</code> to fetch it
+            (we'll introduce <code>useEffect</code> right before we need it).
+        </p>
+
+        <h3 style="margin-top:20px;">useState</h3>
+        <p>
+            <code>useState</code> lets a component remember a value between renders.
+            You give it an initial value and it hands you back two things: the current value, and a function to update it.
+            Whenever you call the update function, React re-renders the component with the new value — this is what makes the page feel "live".
+            Think of it like a variable that React is watching: change it through the setter and the UI automatically reflects the new state.
+            Unlike a regular variable, state survives re-renders and always triggers the UI to update when it changes.
+        </p>
+        <div class="grid">
+            <div class="card">
+                <h3>Syntax</h3>
+                <pre>// General pattern
+const [value, setValue] = useState(initialValue);
+
+// Example — a counter
+const [count, setCount] = useState(0);
+
+// Later, in a button handler:
+setCount(count + 1);  // triggers a re-render</pre>
+            </div>
+            <div class="card">
+                <h3>The [thing, setThing] convention</h3>
+                <p style="margin:0 0 8px; font-size:0.93rem;">
+                    The naming convention <code>[thing, setThing]</code> is not enforced by React —
+                    it is just a very strong community convention. The first item is always the
+                    current value; the second is the updater function.
+                </p>
+                <pre>// For a list of recipes:
+const [recipes, setRecipes] = useState([]);
+
+// For a loading flag:
+const [loading, setLoading] = useState(true);
+
+// For an error message:
+const [error, setError] = useState("");</pre>
+            </div>
+        </div>
+        <div class="note ok">
+            <strong>Rule:</strong> never modify state directly (e.g. <code>recipes.push(...)</code>).
+            Always call the setter (<code>setRecipes(...)</code>) so React knows something changed and can re-render.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Step 2: Create the RecipeList component</h2>
+        <p>
+            Now that the page says Hello, let's build the component that will eventually display our recipes.
+            Create a new folder <code>components/</code> under recipes-frontend folder (same level as apps) , and inside it create
+            <code>RecipeList.jsx file</code>.
+        </p>
+        <p>Start with the simplest possible version — a hardcoded list so we can focus on JSX first:</p>
+        <pre>export default function RecipeList() {
+  return (
+    &lt;ul&gt;
+      &lt;li&gt;Chicken Soup&lt;/li&gt;
+      &lt;li&gt;Caesar Salad&lt;/li&gt;
+      &lt;li&gt;Chocolate Cake&lt;/li&gt;
+    &lt;/ul&gt;
+  );
+}</pre>
+        <p>Then use it in <code>app/page.js</code> by importing and dropping it in like an HTML tag:</p>
+        <pre>import RecipeList from "@/components/RecipeList";
+
+export default function HomePage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;My Recipes&lt;/h1&gt;
+      &lt;RecipeList /&gt;
+    &lt;/main&gt;
+  );
+}</pre>
+        <div class="note ok">
+            <strong>JSX in action:</strong> notice <code>&lt;RecipeList /&gt;</code> — your own component is used exactly
+            like an HTML tag. This is JSX. The file name becomes the tag name.
+        </div>
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>What just happened?</h3>
+                <p style="font-size:0.93rem;">
+                    We created a <strong>component</strong> — a reusable JavaScript function that returns JSX.
+                    The page doesn't need to know how the list works; it just says <code>&lt;RecipeList /&gt;</code>
+                    and React takes care of the rest.
+                </p>
+            </div>
+            <div class="card">
+                <h3>File structure so far</h3>
+                <pre style="margin-top:0;">recipes-frontend/
+├── app/
+│   ├── page.js       ← uses RecipeList
+│   └── layout.js
+└── components/
+    └── RecipeList.jsx ← new!</pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Step 3: Add state to RecipeList with useState</h2>
+        <p>
+            A hardcoded list isn't very useful. Let's use <code>useState</code> to store the recipes
+            inside the component so they can change later.
+            Remember — state is a variable that React watches: when it changes, the UI re-renders automatically.
+        </p>
+        <p>
+            Because we're using a hook (<code>useState</code>), we must declare this a
+            <strong>client component</strong> with <code>"use client"</code> at the very top of the file.
+        </p>
+        <pre>"use client";
+
+import { useState } from "react";
+
+export default function RecipeList() {
+  const [recipes, setRecipes] = useState([
+    { id: 1, title: "Chicken Soup" },
+    { id: 2, title: "Caesar Salad" },
+    { id: 3, title: "Chocolate Cake" },
+  ]);
+
+  return (
+    &lt;ul&gt;
+      {recipes.map((recipe) =&gt; (
+        &lt;li key={recipe.id}&gt;{recipe.title}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</pre>
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>Three new things at once</h3>
+                <ul style="font-size:0.93rem;">
+                    <li><code>"use client"</code> — opts this component into the browser (required for hooks)</li>
+                    <li><code>useState([...])</code> — stores the list; starts with hardcoded data for now</li>
+                    <li><code>.map()</code> in JSX — turns the array into <code>&lt;li&gt;</code> elements</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>The key prop</h3>
+                <p style="font-size:0.93rem;">
+                    Each <code>&lt;li&gt;</code> has a <code>key={recipe.id}</code>.
+                    React uses this to efficiently update only the items that changed.
+                    Always give list items a unique key — React will warn you if you forget.
+                </p>
+            </div>
+        </div>
+        <div class="note ok">
+            <strong>Check:</strong> the page should still show the same three recipes — but now they live in
+            state inside <code>RecipeList</code> and are rendered with <code>.map()</code>.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Introducing useEffect</h2>
+        <p>
+            <code>useEffect</code> lets you run code <em>after</em> the component renders — perfect for things
+            that shouldn't block the UI from appearing, like fetching data from an API.
+            You give it a function (the "effect") and an optional <strong>dependency array</strong> that controls
+            <em>when</em> it runs. Passing an empty array <code>[]</code> means "run this once,
+            right after the first render" — exactly what we want for an initial data load.
+            Without the array, the effect would re-run after every single render, which is almost
+            never what you want for a fetch call.
+        </p>
+        <div class="grid">
+            <div class="card">
+                <h3>Shape of useEffect</h3>
+                <pre>useEffect(() =&gt; {
+  // code that runs after render
+}, [/* dependency array */]);</pre>
+            </div>
+            <div class="card">
+                <h3>Dependency array cheat-sheet</h3>
+                <ul style="font-size:0.93rem; margin:0; padding-left:18px; line-height:2;">
+                    <li><code>[]</code> — run once on mount (first render only)</li>
+                    <li><code>[value]</code> — re-run whenever <code>value</code> changes</li>
+                    <li>omitted — re-run after every render</li>
+                </ul>
+            </div>
+        </div>
+        <div class="note warn">
+            <strong>Common mistake:</strong> forgetting the <code>[]</code> on a fetch effect causes an infinite loop —
+            fetch updates state → state change triggers a re-render → re-render triggers the effect again → repeat forever.
+        </div>
+    </section>
+    <section class="section">
+        <h2>Common issue: CORS - Cross-Origin Resource Sharing</h2>
+        <div class="note warn">
+            CORS is a browser security feature that controls how a web page can request resources from a different domain.
+            The frontend runs on <code>localhost:3000</code> and the Flask backend often runs on <code>localhost:5000</code>.
+            Different ports count as different origins,so the browser blocks requests unless the backend explicitly allows it via CORS.
+            When CORS is enabled on the backend, it sends special headers that tell the browser: <p>"I know this request is coming from a different origin, but it's okay, let it through."</p>
+            <p>This is an example HTTP response header that allows requests from our frontend:</p>
+            <code>Access-Control-Allow-Origin: http://localhost:3000</code>
+        </div>
+        <p>To enable CORS on the Flask side
+        pull in this change into your local backend repo that should be using <code> auth </code> branch by typing:
+        </p>
+        <pre>git pull upstream auth</pre>
+        <p>Then, install the Flask-CORS package and add it to your Flask app
+        <pre>pip install -r requirements.txt</pre>
+        <p>In your Flask app in app/.__init__.py you will see this change:</p>
+        <pre>from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app) # <---- is added to enable CORS for all routes, allowing the frontend to fetch data from the backend without CORS errors.</pre>
+        </pre>
+    </section>
+
+
+    <section class="section">
+        <h2>Step 4: Fetch real data from Flask inside RecipeList</h2>
+        <p>
+            Now replace the hardcoded initial state with an empty array, and add a <code>useEffect</code>
+            to fetch the real data from the Flask API after the component first renders.
+        </p>
+        <pre>"use client";
+
+import { useState, useEffect } from "react";
+
+export default function RecipeList() {
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch("http://localhost:5000/api/recipes")
+      .then((response) =&gt; response.json())
+      .then((data) =&gt; setRecipes(data))
+      .catch((error) =&gt; console.log("Error fetching recipes:", error));
+  }, []);
+
+  return (
+    &lt;ul&gt;
+      {recipes.map((recipe) =&gt; (
+        &lt;li key={recipe.id}&gt;{recipe.title || recipe.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</pre>
+        <div class="note">
+            <strong>Notice the empty array:</strong> <code>[]</code> means this effect runs exactly once —
+            right after <code>RecipeList</code> first appears on the page.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Step 5: Lift the fetch up to page.js (passing props)</h2>
+        <p>
+            Having the fetch inside <code>RecipeList</code> works, but pages often own the data and
+            pass it down to components. This is a core React pattern called <strong>lifting state up</strong>.
+            Move the fetch to <code>page.js</code> and pass the data to <code>RecipeList</code> as a <strong>prop</strong>.
+        </p>
+        <p>Update <code>app/page.js</code>:</p>
+        <pre>"use client";  //Add this to enable hooks in the page
+
+import { useState, useEffect } from "react";
+import RecipeList from "@/components/RecipeList";
+
+export default function HomePage() {
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch("http://localhost:5000/api/recipes")
+      .then((response) =&gt; response.json())
+      .then((data) =&gt; setRecipes(data))
+      .catch((error) =&gt; console.log("Error fetching recipes:", error));
+  }, []);
+
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;My Recipes&lt;/h1&gt;
+      &lt;p&gt;Number of recipes: {recipes.length}&lt;/p&gt;
+      &lt;RecipeList recipes={recipes} /&gt;
+    &lt;/main&gt;
+  );
+}</pre>
+        <p>And simplify <code>components/RecipeList.jsx</code> — it no longer fetches, it just renders what it receives:</p>
+        <pre>export default function RecipeList({ recipes }) {
+  return (
+    &lt;ul&gt;
+      {recipes.map((recipe) =&gt; (
+        &lt;li key={recipe.id}&gt;{recipe.title || recipe.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</pre>
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>What is a prop?</h3>
+                <p style="font-size:0.93rem;">
+                    Props are arguments you pass into a component — just like method parameters in Java.
+                    The page owns the data and passes it down; the component just displays it.
+                    <code>RecipeList</code> doesn't care where the data came from, only that it receives an array.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Data flow</h3>
+                <div class="flow" style="margin-top:8px; font-size:0.9rem;">
+                    <span>Flask API</span>
+                    <span class="arrow">→</span>
+                    <span>page.js (state)</span>
+                    <span class="arrow">→</span>
+                    <span>RecipeList (prop)</span>
+                </div>
+            </div>
+        </div>
+        <div class="note ok">
+            <strong>Now <code>RecipeList</code> no longer needs <code>"use client"</code></strong> — it has no hooks.
+            Only <code>page.js</code> needs it since that's where state and useEffect live.
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Optional: add loading and error messages</h2>
+        <p>This makes the UI feel more complete and also introduces realistic state handling.</p>
+        <pre>"use client";
+
+import { useEffect, useState } from "react";
+import RecipeList from "@/components/RecipeList";
+
+export default function HomePage() {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() =&gt; {
+    fetch("http://localhost:5000/api/recipes")
+      .then((response) =&gt; {
+        if (!response.ok) {
+          throw new Error("Failed to fetch recipes");
+        }
+        return response.json();
+      })
+      .then((data) =&gt; setRecipes(data))
+      .catch((err) =&gt; setError(err.message))
+      .finally(() =&gt; setLoading(false));
+  }, []);
+
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Recipes&lt;/h1&gt;
+      {loading &amp;&amp; &lt;p&gt;Loading...&lt;/p&gt;}
+      {error &amp;&amp; &lt;p&gt;Error: {error}&lt;/p&gt;}
+      {!loading &amp;&amp; !error &amp;&amp; &lt;RecipeList recipes={recipes} /&gt;}
+    &lt;/main&gt;
+  );
+}</pre>
+    </section>
+
+    <section class="section">
+        <h2>Simple styling</h2>
+        <p>Now it looks really boring. You can add a little styling by adding this CSS in <code>app/globals.css</code>:</p>
+        <pre>body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f8fafc;
+}
+
+main {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}</pre>
+    </section>
+
+    <section class="section">
+        <h2>Upgrading the UI with Material UI (MUI)</h2>
+        <p>
+            <strong>Material UI</strong> (MUI) is the most popular React component library.
+            Instead of writing raw HTML and CSS, you use pre-built, polished components like
+            <code>&lt;Card&gt;</code>, <code>&lt;Typography&gt;</code>, and <code>&lt;Button&gt;</code>
+            that follow Google's Material Design system.
+            It saves a huge amount of CSS work and gives your app a professional look instantly.
+        </p>
+
+        <h3 style="margin-top:20px;">Install MUI</h3>
+        <p>Run this in your project folder:</p>
+        <pre>npm install @mui/material @emotion/react @emotion/styled</pre>
+        <div class="note">
+            MUI uses <strong>Emotion</strong> under the hood for styling — those two extra packages are required.
+            You don't need to write any Emotion code yourself.
+        </div>
+
+        <h3 style="margin-top:24px;">Step 6: Create a RecipeCard component</h3>
+        <p>
+            Instead of a plain <code>&lt;li&gt;</code>, each recipe will now be displayed in a
+            MUI <code>Card</code> — a styled box with a title, a short description, and a button.
+            Create <code>components/RecipeCard.jsx</code>:
+        </p>
+        <pre>"use client";
+
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+
+export default function RecipeCard({ recipe }) {
+  return (
+    &lt;Card sx={{ marginBottom: 2 }}&gt;
+      &lt;CardContent&gt;
+        &lt;Typography variant="h6" component="h2"&gt;
+          {recipe.title || recipe.name}
+        &lt;/Typography&gt;
+        &lt;Typography variant="body2" color="text.secondary"&gt;
+          {recipe.description || "No description available."}
+        &lt;/Typography&gt;
+      &lt;/CardContent&gt;
+      &lt;CardActions&gt;
+        &lt;Button size="small"&gt;View Recipe&lt;/Button&gt;
+      &lt;/CardActions&gt;
+    &lt;/Card&gt;
+  );
+}</pre>
+
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>Key MUI components used</h3>
+                <ul style="font-size:0.93rem;">
+                    <li><code>Card</code> — the outer container box with a shadow</li>
+                    <li><code>CardContent</code> — padded area for the main content</li>
+                    <li><code>CardActions</code> — bottom area for buttons</li>
+                    <li><code>Typography</code> — text with built-in sizing and color variants</li>
+                    <li><code>Button</code> — a styled, accessible button</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>The sx prop</h3>
+                <p style="font-size:0.93rem;">
+                    <code>sx</code> is MUI's shortcut for inline styles using a theme-aware syntax.
+                    <code>sx={{ marginBottom: 2 }}</code> means "apply 2 units of bottom margin"
+                    using MUI's spacing scale (1 unit = 8px by default, so this is 16px).
+                    Think of it as a smarter version of the HTML <code>style</code> attribute.
+                </p>
+            </div>
+        </div>
+
+        <h3 style="margin-top:24px;">Step 7: Create a RecipeCardList component</h3>
+        <p>
+            Now add  <code>RecipeCardList.jsx</code> component that
+            uses MUI's layout components to arrange the cards in a responsive grid.
+            Create <code>components/RecipeCardList.jsx</code>:
+        </p>
+        <pre>import Grid from "@mui/material/Grid";
+import RecipeCard from "./RecipeCard";
+
+export default function RecipeCardList({ recipes }) {
+  return (
+    &lt;Grid container spacing={3}&gt;
+      {recipes.map((recipe) =&gt; (
+        &lt;Grid size={{ xs: 12, sm: 6, md: 4 }} key={recipe.id}&gt;
+          &lt;RecipeCard recipe={recipe} /&gt;
+        &lt;/Grid&gt;
+      ))}
+    &lt;/Grid&gt;
+  );
+}</pre>
+
+        <div class="grid" style="margin-top:16px;">
+            <div class="card">
+                <h3>Grid layout explained</h3>
+                <p style="font-size:0.93rem;">
+                    MUI Grid works like CSS Flexbox/Grid but with a 12-column system.
+                    <code>xs={12}</code> means "full width on mobile",
+                    <code>sm={6}</code> means "half width on tablet",
+                    <code>md={4}</code> means "one-third width on desktop".
+                    The cards will reflow automatically as the window resizes — for free.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Component tree</h3>
+                <pre style="margin-top:0; font-size:0.85rem;">page.js
+└── &lt;RecipeCardList recipes={...} /&gt;
+    └── &lt;Grid container&gt;
+        └── &lt;Grid item&gt; × N
+            └── &lt;RecipeCard recipe={...} /&gt;
+                └── &lt;Card&gt;, &lt;Typography&gt;, ...</pre>
+            </div>
+        </div>
+
+        <h3 style="margin-top:24px;">Update page.js to use RecipeCardList</h3>
+        <p>Swap <code>RecipeList</code> for <code>RecipeCardList</code> in <code>app/page.js</code>:</p>
+        <pre>"use client";
+
+import { useState, useEffect } from "react";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import RecipeCardList from "@/components/RecipeCardList";
+
+export default function HomePage() {
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch("http://localhost:5001/api/recipes")
+      .then((response) =&gt; response.json())
+      .then((data) =&gt; setRecipes(data))
+      .catch((error) =&gt; console.log("Error fetching recipes:", error));
+  }, []);
+
+  return (
+    &lt;Container maxWidth="lg" sx={{ mt: 4 }}&gt;
+      &lt;Typography variant="h4" component="h1" gutterBottom&gt;
+        My Recipes
+      &lt;/Typography&gt;
+      &lt;RecipeCardList recipes={recipes} /&gt;
+    &lt;/Container&gt;
+  );
+}</pre>
+
+        <div class="note ok">
+            <strong>Container</strong> is MUI's responsive page wrapper — it automatically centers the content
+            and adds horizontal padding. <code>maxWidth="lg"</code> caps the width at 1200px.
+            <code>sx={{ mt: 4 }}</code> adds top margin (4 × 8px = 32px).
+        </div>
+
+        <h3 style="margin-top:24px;">Updated file structure</h3>
+        <pre>recipes-frontend/
+├── app/
+│   ├── page.js            ← uses RecipeCardList + MUI Container
+│   └── layout.js
+└── components/
+    ├── RecipeCard.jsx      ← new: single card with MUI Card
+    └── RecipeCardList.jsx  ← new: responsive MUI Grid of cards</pre>
+    </section>
+
+
+
+    <section class="section">
+        <h2>Suggested in-class checkpoints</h2>
+        <div class="timeline">
+            <div class="step"><strong>Checkpoint 1:</strong> Next app runs and the home page says Hello from Next.js.</div>
+            <div class="step"><strong>Checkpoint 2:</strong> <code>RecipeList.jsx</code> created and renders a hardcoded list via JSX.</div>
+            <div class="step"><strong>Checkpoint 3:</strong> <code>"use client"</code> and <code>useState</code> added to <code>RecipeList</code>; hardcoded data lives in state and renders with <code>.map()</code>.</div>
+            <div class="step"><strong>Checkpoint 4:</strong> <code>useEffect</code> fetches real data from Flask; <code>recipes.length</code> updates.</div>
+            <div class="step"><strong>Checkpoint 5:</strong> Fetch lifted to <code>page.js</code>; data passed to <code>RecipeList</code> as a prop.</div>
+            <div class="step"><strong>Checkpoint 6:</strong> MUI installed; <code>RecipeCard.jsx</code> displays a single recipe in a MUI <code>Card</code>.</div>
+            <div class="step"><strong>Checkpoint 7:</strong> <code>RecipeCardList.jsx</code> renders cards in a responsive MUI <code>Grid</code>; <code>page.js</code> uses <code>Container</code> and <code>Typography</code>.</div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Student task</h2>
+        <ol>
+            <li>Create a new Next.js app with the App Router.</li>
+            <li>Replace the default page with a simple Hello World page.</li>
+            <li>Create a <code>RecipeList</code> component with a hardcoded list and use it in <code>page.js</code>.</li>
+            <li>Add <code>"use client"</code> and <code>useState</code> to <code>RecipeList</code>; store the hardcoded data in state and render it with <code>.map()</code>.</li>
+            <li>Add <code>useEffect</code> to fetch recipe data from the Flask backend.</li>
+            <li>Lift the fetch up to <code>page.js</code> and pass the data down to <code>RecipeList</code> as a prop.</li>
+            <li>Install MUI and create a <code>RecipeCard</code> component using <code>Card</code>, <code>CardContent</code>, and <code>Typography</code>.</li>
+            <li>Create a <code>RecipeCardList</code> component that lays out <code>RecipeCard</code>s in a responsive MUI <code>Grid</code>.</li>
+        </ol>
+    </section>
+
+    <section class="section">
+        <h2>Stretch goal</h2>
+        <p>Add a form in the next lesson so you can submit a new recipe with a POST request and refresh the list.</p>
+    </section>
+</main>
+</body>
+</html>
